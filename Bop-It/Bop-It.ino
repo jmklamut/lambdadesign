@@ -32,10 +32,36 @@ void incorrect(){
   game = false;
 }
 
+bool changedPot(float vPotStart)
+{
+  float newV = analogRead(A0);
+  if(abs(newV - vPotStart) > 20)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+
+}
+
+bool pushedButton()
+{
+  return !digitalRead(8);
+}
+
+bool fanOn()
+{
+  return analogRead(A2)>60;
+}
+
 
 
 void loop() {
   // put your main code here, to run repeatedly:
+  float vPotStart = analogRead(A0);
+
 /*
   randomSeed(millis());
 
@@ -105,4 +131,8 @@ void loop() {
   lcg.print(value);
   delay(500);
 
+
+
+
 }
+
