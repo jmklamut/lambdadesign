@@ -46,6 +46,19 @@ bool changedPot(float vPotStart)
 
 }
 
+bool flipped(float flipVoltage)
+{
+  float newVoltage = analogRead(A1);
+
+  if((newVoltage - flipVoltage) > 20)
+  {
+    return true;
+  }
+  else
+    return false;
+  
+}
+
 bool pushedButton()
 {
   return !digitalRead(8);
@@ -57,10 +70,10 @@ bool fanOn()
 }
 
 
-
 void loop() {
   // put your main code here, to run repeatedly:
   float vPotStart = analogRead(A0);
+  float flipVoltage = analogRead(A1);
 
 /*
   randomSeed(millis());
