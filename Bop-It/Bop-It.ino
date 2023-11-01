@@ -263,7 +263,7 @@ void loop() {
   input = false;
     //TODO: don't restart
   
-*/
+
 
 //testing
   float value = analogRead(A2);
