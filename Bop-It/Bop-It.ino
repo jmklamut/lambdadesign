@@ -266,12 +266,14 @@ void loop() {
 
 
 //testing
+/*
   float value = analogRead(A2);
   
   lcd.clear();
   lcd.setCursor(0,0);
   lcg.print(value);
   delay(500);
+  */
 
 
 
