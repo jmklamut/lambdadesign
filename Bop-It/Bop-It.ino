@@ -6,6 +6,28 @@ int score = 0;
 bool game = true;
 bool input = true;
 
+const int background_tone[] = {400, 300, 250, 200, -1, 300, 350};
+const unsigned long background_duration[] = {200, 200, 150, 250, 100, 200, 250, 250};
+
+const int defeat_tone[] = {200, 175, 150, 125};
+const unsigned long defeat_duration[] = {300, 300, 300, 300};
+
+const int victory_tone[] = {300, 225, 350, 375, -1, 375, -1, 375};
+const unsigned long victory_duration[] = {150, 150, 150, 100, 50, 100, 50, 300};
+
+const int success_tone[] = {300, 350, 400, 450};
+const unsigned long success_duration[] = {150, 150, 150, 150};
+
+const int reopen_tone[] = {500, -1, 500};
+const unsigned long reopen_duration[] = {100, 100, 100};
+
+const int button_tone[] = {-1, 200, -1};
+const unsigned long button_duration[] = {100, 100, 100};
+
+const int slide_tone[] = {150, 200, 250, 300, 350, 400};
+const unsigned long slide_duration[] = {50, 50, 50, 50, 50, 50};
+
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
