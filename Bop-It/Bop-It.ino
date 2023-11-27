@@ -5,6 +5,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 int score = 0;
 bool game = true;
 bool input = true;
+bool playing_game = true;
 
 const int background_tone[] = {400, 300, 250, 200, -1, 300, 350};
 const unsigned long background_duration[] = {200, 200, 150, 250, 100, 200, 250, 250};
@@ -23,7 +24,7 @@ const unsigned long success_duration[] = {150, 150, 150, 150};
 const int success_tone_size = 4;
 
 const int cool_tone[] = {500, -1, 500};
-const unsigned long cool_tone_duration[] = {100, 100, 100};
+const unsigned long cool_duration[] = {100, 100, 100};
 const int cool_tone_size = 3;
 
 const int button_tone[] = {-1, 200, -1};
@@ -40,11 +41,9 @@ const int flip_tone_size = 6;
 
 
 
-
-
 void success(){
   lcd.clear();
-  digitalWrite(6, HIGH);
+ // digitalWrite(6, HIGH);
   score++;
   lcd.print(score);
 }
@@ -54,9 +53,10 @@ void incorrect(){
   lcd.print("You Lose");
   score = 0;
   game = false;
+  delay(1000);
 }
 
-bool slice(float vPotStart)
+bool sliced(float vPotStart)
 {
   float newV = analogRead(A0);
   if(abs(newV - vPotStart) > 20)
@@ -93,7 +93,7 @@ bool fanOn()
   return analogRead(A2)>60;
 }
 
-void play_tone(int sounds[], int duration[], int size){
+void play_tone(int sounds[], unsigned long duration[], int size){
   //unsigned long last_tone_start = millis();
   int current_tone = 0;
 
@@ -112,233 +112,239 @@ void setup() {
   lcd.backlight();
 
   pinMode(8, INPUT_PULLUP);
-  pinMode(6, OUTPUT);
+ // pinMode(7, INPUT_PULLUP);
+  //pinMode(6, OUTPUT);
   
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  float vPotStart = analogRead(A0);
-  float flipVoltage = analogRead(A1);
-
-  
-  int number = random(1,5); // random input 
-  int action = -1; //action needed
-  int condition = 0; // if action met, condition 1, else condition -1, 0 defalut value
-
-  if(number == 1){
-    action = 1; //button input
+  /*
+  if(!digitalRead(7) && playing_game == false){
+    playing_game = true;
   }
-  else if(number == 2){
-    action = 2; //slider input
+  else if(playing_game == false){
+    lcd.setCursor(0,0);
+    lcd.print("Press Button");
+    lcd.setCursor(0,1);
+    lcd.print("To Start");
   }
-  else if(number == 3){
-    action = 3; // rotary decoder input
-  }
-  else{
-    action = 4; // pressure sensor input
-  }
-
-
-  if(action == 1){
-      lcd.clear();
-      lcd.print("Stack it!");
-      delay(200);
-      while(!input){
-        if(flipped(flipVoltage)){
-          lcd.clear();
-          lcd.print("Flip");
-          condition = -1;
-          input = true;
-          play_tone(flip_tone, flip_duration, flip_tone_size);
-          
-        }
-        else if(sliced(VPotStart)){
-          lcd.clear();
-          lcd.print("Sliced");
-          condition = -1;
-          input = true;
-          play_tone(slice_tone, slice_duration, slice_tone_size);
-
-        }
-        else if(fanOn()){
-          lcd.clear();
-          lcd.print("Fan");
-          condition = -1;
-          input = true;
-          play_tone(cool_tone, cool_duration, cool_tone_size);
-
-        }
-        else if(pushedButton()){
-          lcd.clear();
-          lcd.print("Pushed");
-          condition = 1;
-          input = true
-          play_tone(button_tone, button_duration, button_tone_size);
-        }
-        else{
-          lcd.clear();
-          lcd.print("No read");
-        }
-      }
-      //TODO: check correct sensor is pushed and not other sensors     
-  }
-  else if(action == 2){
-    lcd.clear();
-    lcd.print("Slice it!");
-    delay(200);
-      while(!input){
-        if(flipped(flipVoltage)){
-          lcd.clear();
-          lcd.print("Flip");
-          condition = -1;
-          input = true;
-          play_tone(flip_tone, flip_duration, flip_tone_size);
-        }
-        else if(sliced(VPotStart)){
-          lcd.clear();
-          lcd.print("Sliced");
-          condition = -1;
-          input = true;
-          play_tone(slice_tone, slice_duration, slice_tone_size);
-
-        }
-        else if(fanOn()){
-          lcd.clear();
-          lcd.print("Fan");
-          condition = -1;
-          input = true;
-          play_tone(cool_tone, cool_duration, cool_tone_size);
-
-        }
-        else if(pushedButton()){
-          lcd.clear();
-          lcd.print("Pushed");
-          condition = 1;
-          input = true
-          play_tone(button_tone, button_duration, button_tone_size);
-        }
-        else{
-          lcd.clear();
-          lcd.print("No read");
-        }
-      }
-    
-    //TODO: check correct sensor is pushed and not other sensors
-  }
-  else if(action == 3){
-    lcd.clear();
-    lcd.print("Flip it!");
-    delay(200);
-      while(!input){
-        if(flipped(flipVoltage)){
-          lcd.clear();
-          lcd.print("Flip");
-          condition = -1;
-          input = true;
-          play_tone(flip_tone, flip_duration, flip_tone_size);
-        }
-        else if(sliced(VPotStart)){
-          lcd.clear();
-          lcd.print("Sliced");
-          condition = -1;
-          input = true;
-          play_tone(slice_tone, slice_duration, slice_tone_size);
-        }
-        else if(fanOn()){
-          lcd.clear();
-          lcd.print("Fan");
-          condition = -1;
-          input = true;
-          play_tone(cool_tone, cool_duration, cool_tone_size);
-        }
-        else if(pushedButton()){
-          lcd.clear();
-          lcd.print("Pushed");
-          condition = 1;
-          input = true
-          play_tone(button_tone, button_duration, button_tone_size);
-        }
-        else{
-          lcd.clear();
-          lcd.print("No read");
-        }
-      }
-    //TODO: check correct sensor is pushed and not other sensors
-  }
-  else if(action == 4){
-    lcd.clear();
-    lcd.print("Air it!");
-    delay(200);
-      while(!input){
-        if(flipped(flipVoltage)){
-          lcd.clear();
-          lcd.print("Flip");
-          condition = -1;
-          input = true;
-          play_tone(flip_tone, flip_duration, flip_tone_size);
-        }
-        else if(sliced(VPotStart)){
-          lcd.clear();
-          lcd.print("Sliced");
-          condition = -1;
-          input = true;
-          play_tone(slice_tone, slice_duration, slice_tone_size);
-        }
-        else if(fanOn()){
-          lcd.clear();
-          lcd.print("Fan");
-          condition = -1;
-          input = true;
-          play_tone(cool_tone, cool_duration, cool_tone_size);
-        }
-        else if(pushedButton()){
-          lcd.clear();
-          lcd.print("Pushed");
-          condition = 1;
-          input = true
-          play_tone(button_tone, button_duration, button_tone_size);
-        }
-        else{
-          lcd.clear();
-          lcd.print("No read");
-        }
-      }
-    
-    //TODO: check correct sensor is pushed and not other sensors
-  }
-
-  if(condition == 1){
-    success();
-    play_tone(success_tone, success_duration, success_tone_size);
-  }
-  else if(condition == -1){
-    play_tone(defeat_tone, defeat_duration, defeat_tone_size);
-    incorrect();
-
-  }
-
-  if(game == false){
-    //TODO: restart the game
-  }
-  
-  input = false;
-    //TODO: don't restart
-  
-
-
-//testing
-/*
-  float value = analogRead(A2);
-  
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcg.print(value);
-  delay(500);
   */
+  lcd.print("Hello");
+  /*
+  while(playing_game){
+    float vPotStart = analogRead(A0);
+    float flipVoltage = analogRead(A1);
+
+    
+    int number = random(1,5); // random input 
+    int action = -1; //action needed
+    int condition = 0; // if action met, condition 1, else condition -1, 0 defalut value
+
+    if(number == 1){
+      action = 1; //button input
+    }
+    else if(number == 2){
+      action = 2; //slider input
+    }
+    else if(number == 3){
+      action = 3; // rotary decoder input
+    }
+    else{
+      action = 4; // pressure sensor input
+    }
 
 
+    if(action == 1){
+        lcd.clear();
+        lcd.print("Stack it!");
+        delay(200);
+        while(!input){
+          if(flipped(flipVoltage)){
+            lcd.clear();
+            lcd.print("Flip");
+            condition = -1;
+            input = true;
+            play_tone(flip_tone, flip_duration, flip_tone_size);
+          }
+          else if(sliced(vPotStart)){
+            lcd.clear();
+            lcd.print("Sliced");
+            condition = -1;
+            input = true;
+            play_tone(slide_tone, slide_duration, slide_tone_size);
 
+          }
+          else if(fanOn()){
+            lcd.clear();
+            lcd.print("Fan");
+            condition = -1;
+            input = true;
+            play_tone(cool_tone, cool_duration, cool_tone_size);
 
+          }
+          else if(pushedButton()){
+            lcd.clear();
+            lcd.print("Pushed");
+            condition = 1;
+            input = true;
+            play_tone(button_tone, button_duration, button_tone_size);
+          }
+          else{
+            lcd.clear();
+            lcd.print("No read");
+          }
+        }
+        //TODO: check correct sensor is pushed and not other sensors     
+    }
+    else if(action == 2){
+      lcd.clear();
+      lcd.print("Slice it!");
+      delay(200);
+        while(!input){
+          if(flipped(flipVoltage)){
+            lcd.clear();
+            lcd.print("Flip");
+            condition = -1;
+            input = true;
+            play_tone(flip_tone, flip_duration, flip_tone_size);
+          }
+          else if(sliced(vPotStart)){
+            lcd.clear();
+            lcd.print("Sliced");
+            condition = -1;
+            input = true;
+            play_tone(slide_tone, slide_duration, slide_tone_size);
+
+          }
+          else if(fanOn()){
+            lcd.clear();
+            lcd.print("Fan");
+            condition = -1;
+            input = true;
+            play_tone(cool_tone, cool_duration, cool_tone_size);
+
+          }
+          else if(pushedButton()){
+            lcd.clear();
+            lcd.print("Pushed");
+            condition = 1;
+            input = true;
+            play_tone(button_tone, button_duration, button_tone_size);
+          }
+          else{
+            lcd.clear();
+            lcd.print("No read");
+          }
+        }
+      
+      //TODO: check correct sensor is pushed and not other sensors
+    }
+    else if(action == 3){
+      lcd.clear();
+      lcd.print("Flip it!");
+      delay(200);
+        while(!input){
+          if(flipped(flipVoltage)){
+            lcd.clear();
+            lcd.print("Flip");
+            condition = -1;
+            input = true;
+            play_tone(flip_tone, flip_duration, flip_tone_size);
+          }
+          else if(sliced(vPotStart)){
+            lcd.clear();
+            lcd.print("Sliced");
+            condition = -1;
+            input = true;
+            play_tone(slide_tone, slide_duration, slide_tone_size);
+          }
+          else if(fanOn()){
+            lcd.clear();
+            lcd.print("Fan");
+            condition = -1;
+            input = true;
+            play_tone(cool_tone, cool_duration, cool_tone_size);
+          }
+          else if(pushedButton()){
+            lcd.clear();
+            lcd.print("Pushed");
+            condition = 1;
+            input = true;
+            play_tone(button_tone, button_duration, button_tone_size);
+          }
+          else{
+            lcd.clear();
+            lcd.print("No read");
+          }
+        }
+      //TODO: check correct sensor is pushed and not other sensors
+    }
+    else if(action == 4){
+      lcd.clear();
+      lcd.print("Air it!");
+      delay(200);
+        while(!input){
+          if(flipped(flipVoltage)){
+            lcd.clear();
+            lcd.print("Flip");
+            condition = -1;
+            input = true;
+            play_tone(flip_tone, flip_duration, flip_tone_size);
+          }
+          else if(sliced(vPotStart)){
+            lcd.clear();
+            lcd.print("Sliced");
+            condition = -1;
+            input = true;
+            play_tone(slide_tone, slide_duration, slide_tone_size);
+          }
+          else if(fanOn()){
+            lcd.clear();
+            lcd.print("Fan");
+            condition = -1;
+            input = true;
+            play_tone(cool_tone, cool_duration, cool_tone_size);
+          }
+          else if(pushedButton()){
+            lcd.clear();
+            lcd.print("Pushed");
+            condition = 1;
+            input = true;
+            play_tone(button_tone, button_duration, button_tone_size);
+          }
+          else{
+            lcd.clear();
+            lcd.print("No read");
+          }
+        }
+      
+      //TODO: check correct sensor is pushed and not other sensors
+    }
+
+    if(condition == 1){
+      success();
+      play_tone(success_tone, success_duration, success_tone_size);
+    }
+    else if(condition == -1){
+      play_tone(defeat_tone, defeat_duration, defeat_tone_size);
+      incorrect();
+    }
+
+    if(!game){
+      playing_game = false;
+      delay(1000);
+    }
+    
+    input = false;
+  }
+  */
 }
+
+
+
+
+
+
+
 
