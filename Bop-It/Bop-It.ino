@@ -3,7 +3,6 @@
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 int score = 0;
-bool game = true;
 bool input = false;
 bool playing_game = false;
 bool cool_it = false;
@@ -49,6 +48,8 @@ void success(){
   lcd.clear();
  // digitalWrite(6, HIGH);
   score++;
+  lcd.print("Current Score: ");
+  lcd.setCursor(0, 1);
   lcd.print(score);
 }
 
@@ -56,7 +57,7 @@ void incorrect(){
   lcd.clear();
   lcd.print("You Lose");
   score = 0;
-  game = false;
+ // playing_game = false;
   delay(1000);
 }
 
@@ -173,7 +174,14 @@ void setup() {
   Serial.begin(9600);
   lcd.init();
   lcd.backlight();
+  lcd.clear();
 
+  randomSeed(analogRead(A3));
+
+
+  pinMode(A2, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A0, INPUT);
   pinMode(8, INPUT_PULLUP);
  // pinMode(7, INPUT_PULLUP);
   //pinMode(6, OUTPUT);
@@ -182,90 +190,99 @@ void setup() {
 
 void loop() {
 
-  int count = 0;
-
-  float vPotStart = analogRead(A0);
-  float flipVoltage = analogRead(A1);
-
-    
-  int number = round(random(1,5)); // random input 
-  int action = -1; //action needed
-  int condition = 0; // if action met, condition 1, else condition -1, 0 defalut value
-
-  lcd.clear();
-  if(number == 1){
-    action = 1; //button input
-    lcd.print("Stack It");
-    stackTone();
+  lcd.print(digitalRead(8));
+  delay(100000);
+  while((digitalRead(8) == HIGH) && playing_game == false){
+    playing_game = true;
+    lcd.setCursor(0,0);
+    lcd.print("Press Button");
+    lcd.setCursor(0,1);
+    lcd.print("To Start");
   }
-  else if(number == 2){
-    action = 2; //slider input
-    lcd.print("Slice It");
-    sliceTone();
-  }
-  else if(number == 3){
-    action = 3; // rotary decoder input
-    lcd.print("Flip It");
-    flipTone();
-  }
-  else{
-    action = 4; // pressure sensor input
-    lcd.print("Cool It");
-    coolTone();
-  }
-
-  bool cool_it = false;
-  bool slice_it = false;
-  bool flip_it = false;
-  bool press_it = false;
-
-  while(!input){
-    if(flipped(flipVoltage)){
-      lcd.clear();
-      lcd.print("Flip");
-      flip_it = true;
-      input = true;
-    //  play_tone(flip_tone, flip_duration, flip_tone_size);
-      delay(500);
-    }
-    else if(sliced(vPotStart)){
-      lcd.clear();
-      lcd.print("Sliced");
-      slice_it = true;
-      input = true;
-     // play_tone(slide_tone, slide_duration, slide_tone_size);
-      delay(500);
-    }
-    else if(fanOn()){
-      lcd.clear();
-      lcd.print("Fan");
-      cool_it = true;
-      input = true;
-      //play_tone(cool_tone, cool_duration, cool_tone_size);
-      delay(500);
-    }
-    else if(pushedButton()){
-      lcd.clear();
-      lcd.print("Stacked");
-      press_it = true;
-      input = true;
-      //play_tone(button_tone, button_duration, button_tone_size);
-      delay(500);
-    }
-  }
-
-  input = false;
-
-  if((flip_it && (action == 3)) || (slice_it && (action == 2)) || (press_it && (action == 1)) || (cool_it && (action == 4))){
-    success();
-    delay(1000);
-  }
-  else{
-    incorrect();
-    delay(1000);
-  }
-  delay(5000);
   
+ // while(playing_game){
+    float vPotStart = analogRead(A0);
+    float flipVoltage = analogRead(A1);
+
+      
+    int number = round(random(1,5)); // random input 
+    int action = -1; //action needed
+    int condition = 0; // if action met, condition 1, else condition -1, 0 defalut value
+
+    lcd.clear();
+    if(number == 1){
+      action = 1; //button input
+      lcd.print("Stack It");
+      stackTone();
+    }
+    else if(number == 2){
+      action = 2; //slider input
+      lcd.print("Slice It");
+      sliceTone();
+    }
+    else if(number == 3){
+      action = 3; // rotary decoder input
+      lcd.print("Flip It");
+      flipTone();
+    }
+    else{
+      action = 4; // pressure sensor input
+      lcd.print("Cool It");
+      coolTone();
+    }
+
+    bool cool_it = false;
+    bool slice_it = false;
+    bool flip_it = false;
+    bool press_it = false;
+
+    while(!input){
+      if(flipped(flipVoltage)){
+        lcd.clear();
+        lcd.print("Flip");
+        flip_it = true;
+        input = true;
+      //  play_tone(flip_tone, flip_duration, flip_tone_size);
+        delay(500);
+      }
+      else if(sliced(vPotStart)){
+        lcd.clear();
+        lcd.print("Sliced");
+        slice_it = true;
+        input = true;
+      // play_tone(slide_tone, slide_duration, slide_tone_size);
+        delay(500);
+      }
+      else if(fanOn()){
+        lcd.clear();
+        lcd.print("Fan");
+        cool_it = true;
+        input = true;
+        //play_tone(cool_tone, cool_duration, cool_tone_size);
+        delay(500);
+      }
+      else if(pushedButton()){
+        lcd.clear();
+        lcd.print("Stacked");
+        press_it = true;
+        input = true;
+        //play_tone(button_tone, button_duration, button_tone_size);
+        delay(500);
+      }
+    }
+
+    input = false;
+
+    if((flip_it && (action == 3)) || (slice_it && (action == 2)) || (press_it && (action == 1)) || (cool_it && (action == 4))){
+      success();
+      delay(1000);
+    }
+    else{
+      incorrect();
+      delay(1000);
+    }
+    delay(5000);
+  //}
   
   // put your main code here, to run repeatedly:
   /*
