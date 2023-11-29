@@ -3,16 +3,15 @@
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 int score = 0;
+int final_score = 0;
 bool input = false;
 bool playing_game = false;
 bool cool_it = false;
 bool slice_it = false;
 bool flip_it = false;
 bool press_it = false;
+unsigned long threshold = 4000;
 
-const int background_tone[] = {400, 300, 250, 200, -1, 300, 350};
-const unsigned long background_duration[] = {200, 200, 150, 250, 100, 200, 250, 250};
-const int background_tone_size = 7;
 
 const int defeat_tone[] = {200, 175, 150, 125};
 const unsigned long defeat_duration[] = {300, 300, 300, 300};
@@ -47,24 +46,44 @@ const int flip_tone_size = 6;
 void success(){
   lcd.clear();
  // digitalWrite(6, HIGH);
-  score++;
-  lcd.print("Current Score: ");
+  play_tone(success_tone, success_duration, success_tone_size);
+  lcd.setCursor(0,0);
+  lcd.print("Success!");
   lcd.setCursor(0, 1);
+  lcd.print("Score: ");
+  score++;
   lcd.print(score);
+  if(score == 99){
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("You Win!");
+    play_tone(victory_tone, victory_duration, victory_tone_size);
+    playing_game == false;
+    threshold = 4000;
+    score = 0;
+    delay(4000);
+  }
 }
 
 void incorrect(){
+  final_score = score;
   lcd.clear();
+  play_tone(defeat_tone, defeat_duration, defeat_tone_size);
   lcd.print("You Lose");
+  lcd.setCursor(0, 1);
+  lcd.print("Score: ");
+  lcd.print(final_score);
+  delay(4000);
   score = 0;
- // playing_game = false;
-  delay(1000);
+  playing_game = false;
+  threshold = 4000;
+  lcd.clear();
 }
 
 bool sliced(float vPotStart)
 {
   float newV = analogRead(A0);
-  if(abs(newV - vPotStart) > 20)
+  if(abs(newV - vPotStart) > 100)
   {
     return true;
   }
@@ -79,7 +98,7 @@ bool flipped(float flipVoltage)
 {
   float newVoltage = analogRead(A1);
 
-  if((newVoltage - flipVoltage) > 20)
+  if(abs(newVoltage - flipVoltage) > 200)
   {
     return true;
   }
@@ -184,23 +203,31 @@ void setup() {
   pinMode(A0, INPUT);
   pinMode(8, INPUT_PULLUP);
  // pinMode(7, INPUT_PULLUP);
-  //pinMode(6, OUTPUT);
+  //pinMode(6, OUTPUT);\
+  
   
 }
 
 void loop() {
 
-  lcd.print(digitalRead(8));
-  delay(100000);
-  while((digitalRead(8) == HIGH) && playing_game == false){
-    playing_game = true;
-    lcd.setCursor(0,0);
-    lcd.print("Press Button");
-    lcd.setCursor(0,1);
-    lcd.print("To Start");
+  while(playing_game == false){
+    if((digitalRead(8) == HIGH)){
+      lcd.setCursor(0,0);
+      lcd.print("Press Button");
+      lcd.setCursor(0,1);
+      lcd.print("To Start");
+    }
+    else if(digitalRead(8) == LOW){
+      playing_game = true;
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Starting...");
+      delay(1000);
+    }
   }
   
- // while(playing_game){
+  
+  while(playing_game){
     float vPotStart = analogRead(A0);
     float flipVoltage = analogRead(A1);
 
@@ -236,52 +263,66 @@ void loop() {
     bool flip_it = false;
     bool press_it = false;
 
-    while(!input){
+    unsigned long start_time = millis();
+
+    while(!input && ((millis() - start_time) < threshold)){
+      
       if(flipped(flipVoltage)){
-        lcd.clear();
-        lcd.print("Flip");
+        //lcd.clear();
+       // lcd.print("Flip");
         flip_it = true;
         input = true;
-      //  play_tone(flip_tone, flip_duration, flip_tone_size);
-        delay(500);
+        //play_tone(flip_tone, flip_duration, flip_tone_size);
+       // delay(10000);
       }
-      else if(sliced(vPotStart)){
-        lcd.clear();
-        lcd.print("Sliced");
+      
+      if(sliced(vPotStart)){
+        //lcd.clear();
+       // lcd.print("Sliced");
         slice_it = true;
         input = true;
-      // play_tone(slide_tone, slide_duration, slide_tone_size);
-        delay(500);
+       //play_tone(slide_tone, slide_duration, slide_tone_size);
+       // delay(10000);
       }
       else if(fanOn()){
-        lcd.clear();
-        lcd.print("Fan");
+       // lcd.clear();
+      //  lcd.print("Fan");
         cool_it = true;
         input = true;
-        //play_tone(cool_tone, cool_duration, cool_tone_size);
-        delay(500);
+       // play_tone(cool_tone, cool_duration, cool_tone_size);
+      //  delay(10000);
       }
       else if(pushedButton()){
-        lcd.clear();
-        lcd.print("Stacked");
+       // lcd.clear();
+       // lcd.print("Stacked");
         press_it = true;
         input = true;
         //play_tone(button_tone, button_duration, button_tone_size);
-        delay(500);
+       // delay(10000);
       }
+      delay(100);
     }
 
-    input = false;
+    threshold = threshold - 50;
+    if (threshold < 650){
+      threshold = 650;
+    }
+
+    if(input == false){
+      incorrect();
+      delay(1000);
+    }
 
     if((flip_it && (action == 3)) || (slice_it && (action == 2)) || (press_it && (action == 1)) || (cool_it && (action == 4))){
       success();
       delay(1000);
     }
-    else{
+    else if(input == true){
       incorrect();
       delay(1000);
     }
-    delay(5000);
+    input = false;
+  }
   //}
   
   // put your main code here, to run repeatedly:
