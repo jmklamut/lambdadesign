@@ -1,6 +1,6 @@
 #include <LiquidCrystal_I2C.h>
 
-
+//variables used in the game
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 int score = 0;
 int final_score = 0;
@@ -12,7 +12,7 @@ bool flip_it = false;
 bool press_it = false;
 unsigned long threshold = 4000;
 
-
+//tones for play_tone function
 const int defeat_tone[] = {200, 175, 150, 125};
 const unsigned long defeat_duration[] = {300, 300, 300, 300};
 const int defeat_tone_size = 4;
@@ -25,6 +25,7 @@ const int success_tone[] = {300, 350, 400, 450};
 const unsigned long success_duration[] = {150, 150, 150, 150};
 const int success_tone_size = 4;
 
+//don't end up using these cool_tone, button_tone, slide_tone, flip_tone
 const int cool_tone[] = {500, -1, 500};
 const unsigned long cool_duration[] = {100, 100, 100};
 const int cool_tone_size = 3;
@@ -42,7 +43,7 @@ const unsigned long flip_duration[] = {50, 50, 50, 50, 50, 50};
 const int flip_tone_size = 6;
 
 
-
+//when succesful input
 void success(){
   lcd.clear();
  // digitalWrite(6, HIGH);
@@ -51,39 +52,43 @@ void success(){
   lcd.print("Success!");
   lcd.setCursor(0, 1);
   lcd.print("Score: ");
-  score++;
+  score++; //increase score
   lcd.print(score);
-  if(score == 99){
+  if(score == 99){ // if the user reaches 99, they win
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("You Win!");
+    digitalWrite(7, HIGH); // turn on green led
     play_tone(victory_tone, victory_duration, victory_tone_size);
-    playing_game == false;
-    threshold = 4000;
+    playing_game == false; //reset 
+    threshold = 4000; //reset
     score = 0;
     delay(4000);
   }
 }
 
+//when incorrect input, player loses
 void incorrect(){
   final_score = score;
   lcd.clear();
   play_tone(defeat_tone, defeat_duration, defeat_tone_size);
+  digitalWrite(6, HIGH); //turn on red led
   lcd.print("You Lose");
   lcd.setCursor(0, 1);
   lcd.print("Score: ");
   lcd.print(final_score);
   delay(4000);
-  score = 0;
-  playing_game = false;
-  threshold = 4000;
+  score = 0; //reset
+  playing_game = false; //reset
+  threshold = 4000; //reset
   lcd.clear();
 }
 
+// if a slice is detected return true
 bool sliced(float vPotStart)
 {
   float newV = analogRead(A0);
-  if(abs(newV - vPotStart) > 100)
+  if(abs(newV - vPotStart) > 100) //change is greater than 100
   {
     return true;
   }
@@ -94,11 +99,12 @@ bool sliced(float vPotStart)
 
 }
 
+//if a flip is detected return true
 bool flipped(float flipVoltage)
 {
   float newVoltage = analogRead(A1);
 
-  if(abs(newVoltage - flipVoltage) > 200)
+  if(abs(newVoltage - flipVoltage) > 200) //change greater than 200
   {
     return true;
   }
@@ -107,16 +113,19 @@ bool flipped(float flipVoltage)
   
 }
 
+//button is pushed return true
 bool pushedButton()
 {
   return !digitalRead(8);
 }
 
+// if the fan detects a voltage, return true
 bool fanOn()
 {
-  return analogRead(A2)>60;
+  return analogRead(A2)>60; //change greater than 60
 }
 
+// will play the arrays of sounds using the sound duration and size
 void play_tone(int sounds[], unsigned long duration[], int size){
   //unsigned long last_tone_start = millis();
   int current_tone = 0;
@@ -129,6 +138,7 @@ void play_tone(int sounds[], unsigned long duration[], int size){
   }
 }
 
+//slicetone, fliptone, stacktone, cooltone are used when that action needs to be preformed
 void sliceTone()
 {
   tone(9, 1000);
@@ -187,7 +197,7 @@ void coolTone()
 
 
 
-
+//sets up ardunio
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -202,14 +212,19 @@ void setup() {
   pinMode(A1, INPUT);
   pinMode(A0, INPUT);
   pinMode(8, INPUT_PULLUP);
- // pinMode(7, INPUT_PULLUP);
-  //pinMode(6, OUTPUT);\
+  pinMode(7, OUTPUT);
+  pinMode(6, OUTPUT);
   
   
 }
 
 void loop() {
 
+  //resets leds
+  digitalWrite(6, LOW);
+  digitalWrite(7, LOW);
+
+  //waits for user to press button to start game
   while(playing_game == false){
     if((digitalRead(8) == HIGH)){
       lcd.setCursor(0,0);
@@ -226,12 +241,12 @@ void loop() {
     }
   }
   
-  
+  //if playing game
   while(playing_game){
     float vPotStart = analogRead(A0);
     float flipVoltage = analogRead(A1);
 
-      
+    //chooses an action for user to perform
     int number = round(random(1,5)); // random input 
     int action = -1; //action needed
     int condition = 0; // if action met, condition 1, else condition -1, 0 defalut value
@@ -263,10 +278,13 @@ void loop() {
     bool flip_it = false;
     bool press_it = false;
 
+    //time that has passed in the game
     unsigned long start_time = millis();
 
+  //if there isn't an input detected and time hasn't run out
     while(!input && ((millis() - start_time) < threshold)){
       
+      //true if flip is detected(input is previous position of potentiometer)
       if(flipped(flipVoltage)){
         //lcd.clear();
        // lcd.print("Flip");
@@ -276,6 +294,7 @@ void loop() {
        // delay(10000);
       }
       
+      //true if slice is detected(input is previous position of potentiometer)
       if(sliced(vPotStart)){
         //lcd.clear();
        // lcd.print("Sliced");
@@ -284,6 +303,7 @@ void loop() {
        //play_tone(slide_tone, slide_duration, slide_tone_size);
        // delay(10000);
       }
+      ///true if fan voltage detected
       else if(fanOn()){
        // lcd.clear();
       //  lcd.print("Fan");
@@ -292,6 +312,7 @@ void loop() {
        // play_tone(cool_tone, cool_duration, cool_tone_size);
       //  delay(10000);
       }
+      //turn if button is pushed
       else if(pushedButton()){
        // lcd.clear();
        // lcd.print("Stacked");
@@ -303,26 +324,32 @@ void loop() {
       delay(100);
     }
 
+    //decreases the threshold
     threshold = threshold - 50;
     if (threshold < 650){
-      threshold = 650;
+      threshold = 650; // threshold limit
     }
 
+  // if no input and time runs out
     if(input == false){
       incorrect();
       delay(1000);
     }
-
+    // if input is detected it matches the action
     if((flip_it && (action == 3)) || (slice_it && (action == 2)) || (press_it && (action == 1)) || (cool_it && (action == 4))){
       success();
       delay(1000);
     }
+    //if input is detected but wrong input
     else if(input == true){
       incorrect();
       delay(1000);
     }
+    //resets for next incoming input
     input = false;
   }
+
+  //Code below here is protyped code
   //}
   
   // put your main code here, to run repeatedly:
