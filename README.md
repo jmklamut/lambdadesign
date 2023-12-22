@@ -1,14 +1,21 @@
-# ShapeSpongeBop-It Final Report
+# SpongeBop-It Final Report
 
 **Team Lambda: Ben, John, and Angie**
 
 ## Design Overview
 
-*SpongeBop-It* is a creative take on the classic Bop-It game, incorporating a culinary theme focused on making a Krabby Patty. Using an ATMega328P microcontroller, a circuit was designed to handle various inputs associated with cooking actions, such as flipping the burger, slicing tomatoes, cooling the stove, and stacking the burger. The game, implemented in Arduino, displays actions on an LCD and produces corresponding tones. Players must execute the action within a time frame, and the game continues until an incorrect action or a successful completion of 99 actions. Inputs include a push button, a sliding potentiometer, a rotating potentiometer, and a fan.
+SpongeBop-It is a take on the traditional Bop-It game with a tasty twist. This bop-it game is based around making a krabby patty. Each input is based around an action that would be done while cooking a burger. The player will have to flip the burger, slice the tomatoes, cool the stove, and stack the burger. With the application of an ATMega328P microcontroller, a circuit was designed to incorporate all the inputs into a game, a random action is chosen and they must follow. The program coded and uploaded using and AVG Programmer and Arduino as the programming software, will carry out the game and allow interaction between the user and the device. The action chosen is displayed on a Liquid Crystal Display simultaneously with a tone sent out from a speaker to indicate an action has been called. Score is calculated each round as the time to perform each action is decreased slightly. The game will keep going until the user performs an incorrect action, misses the time frame, or successfully completes 99 actions. The inputs correspond with certain devices which include a push button, a sliding potentiometer, rotating potentiometer, and a fan.  
+
+Originally, the game was inspired by the game Cooking Mama, because the many actions that go into one themed level of creating a certain meal. It was later decided to go with the Spongebob theme to make it more known. The original design sketch of the bop it is shown below. This design was carried out very similarly as shown in our final project.
+
+![bopit skect](https://github.com/jmklamut/lambdadesign/assets/60929205/6d824607-afcb-42af-9a7d-44f1be08f978)
+![final sponge](https://github.com/jmklamut/lambdadesign/assets/60929205/045813a2-f40f-416b-b0b4-9211ce14497e)
 
 ## Design Verification
 
-Individual component testing was conducted to ensure proper functionality. Each input component was tested, including the button, potentiometers, and speaker. The design aimed for a cohesive integration of hardware and software elements.
+To verify our design, we first tested each individual component. The first component we tested was the button or Stack-It! Testing the button was simple, we just had it print out on the LCD display we connected to the ATMega microcontroller. The second was testing the potentiometers. The first potentiometer was Flip-It. We verified this component by outputting the voltage on the LCD screen with a simple print statement in the loop function in Arduino. To verify the slide potentiometer, we did the same testing as the first potentiometer.  
+
+![BopItBreadboardComp](https://github.com/jmklamut/lambdadesign/assets/60929205/57377243-d9b5-41da-927b-7688cf62cffe)
 
 ## Electronic Design Implementation
 
